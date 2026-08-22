@@ -1,0 +1,35 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (NUNCA subir el .env real)
+.env
+.env.local
+.env.*.local
+
+# Builds
+dist/
+build/
+backend/dist/
+frontend/dist/
+
+# Angular
+.angular/
+frontend/.angular/
+
+# Tests
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editores / SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code
+CLAUDE.md
+
