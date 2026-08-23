@@ -1,0 +1,137 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Ordenes de trabajo</h1>
+    @if (auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+      <button pButton icon="pi pi-plus" label="Nueva orden" (click)="abrirCrear()"></button>
+    }
+  </div>
+
+  <div class="toolbar">
+    <button
+      pButton
+      [outlined]="estadoFiltro() !== null"
+      label="Todas"
+      size="small"
+      (click)="filtrarPorEstado(null, tabla)"
+    ></button>
+    @for (estado of estados; track estado) {
+      <button
+        pButton
+        [outlined]="estadoFiltro() !== estado"
+        [severity]="severidadEstado(estado)"
+        [label]="estado"
+        size="small"
+        (click)="filtrarPorEstado(estado, tabla)"
+      ></button>
+    }
+  </div>
+
+  <p-table
+    #tabla
+    [value]="ordenes()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="limit"
+    [totalRecords]="total()"
+    [loading]="cargando()"
+    dataKey="id"
+    responsiveLayout="scroll"
+    (onLazyLoad)="cargar($event)"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Numero</th>
+        <th>Vehiculo</th>
+        <th>Cliente</th>
+        <th>Mecanico</th>
+        <th>Estado</th>
+        <th>Total</th>
+        <th>Apertura</th>
+        <th style="width: 60px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-orden>
+      <tr>
+        <td><strong>{{ orden.numero }}</strong></td>
+        <td>{{ orden.vehiculo.patente }} · {{ orden.vehiculo.descripcion }}</td>
+        <td>{{ orden.cliente.nombreCompleto }}</td>
+        <td>{{ orden.mecanico?.nombre || '—' }}</td>
+        <td><p-tag [value]="orden.estado" [severity]="severidadEstado(orden.estado)" /></td>
+        <td class="money">{{ orden.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td>
+        <td>{{ orden.fechaApertura | date: 'dd-MM-yyyy HH:mm' }}</td>
+        <td>
+          <button pButton icon="pi pi-eye" text [routerLink]="['/ordenes-trabajo', orden.id]" title="Ver detalle"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="8" class="empty-state">No hay ordenes de trabajo con este filtro.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  header="Nueva orden de trabajo"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+>
+  <form [formGroup]="form" class="form-grid" (ngSubmit)="guardar()">
+    <div class="form-field" style="grid-column: 1 / -1">
+      <label>Vehiculo</label>
+      @if (vehiculoPreseleccionado(); as v) {
+        <div class="vehiculo-chip">
+          <span><strong>{{ v.patente }}</strong> · {{ v.descripcion }} — {{ v.cliente.nombreCompleto }}</span>
+          <button pButton type="button" icon="pi pi-times" text size="small" (click)="quitarVehiculoSeleccionado()"></button>
+        </div>
+      } @else {
+        <p-autocomplete
+          [suggestions]="sugerenciasVehiculo()"
+          (completeMethod)="buscarVehiculos($event)"
+          (onSelect)="seleccionarVehiculo($event.value)"
+          optionLabel="patente"
+          placeholder="Busca por patente, marca o modelo"
+          [dropdown]="false"
+          styleClass="w-full"
+        >
+          <ng-template let-vehiculo pTemplate="item">
+            <strong>{{ vehiculo.patente }}</strong> — {{ vehiculo.descripcion }} ({{ vehiculo.cliente.nombreCompleto }})
+          </ng-template>
+        </p-autocomplete>
+        @if (form.controls.vehiculoId.invalid && form.controls.vehiculoId.touched) {
+          <small class="error">Selecciona un vehiculo</small>
+        }
+      }
+    </div>
+
+    <div class="form-field">
+      <label for="mecanicoId">Mecanico asignado</label>
+      <p-select
+        id="mecanicoId"
+        formControlName="mecanicoId"
+        [options]="mecanicos()"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Sin asignar"
+        [showClear]="true"
+        styleClass="w-full"
+      />
+    </div>
+    <div class="form-field">
+      <label for="kilometraje">Kilometraje</label>
+      <p-inputnumber id="kilometraje" formControlName="kilometraje" [useGrouping]="true" suffix=" km" styleClass="w-full" />
+    </div>
+    <div class="form-field" style="grid-column: 1 / -1">
+      <label for="observaciones">Observaciones</label>
+      <textarea pTextarea id="observaciones" formControlName="observaciones" rows="2"></textarea>
+    </div>
+  </form>
+
+  <div class="form-actions">
+    <button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="cerrarDialogo()"></button>
+    <button pButton type="button" label="Crear orden" [loading]="guardando()" (click)="guardar()"></button>
+  </div>
+</p-dialog>

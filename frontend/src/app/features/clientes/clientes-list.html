@@ -1,0 +1,145 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Clientes</h1>
+    @if (auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+      <button pButton icon="pi pi-plus" label="Nuevo cliente" (click)="abrirCrear()"></button>
+    }
+  </div>
+
+  <div class="toolbar">
+    <p-iconfield>
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        placeholder="Buscar por nombre, apellido o RUT"
+        (input)="buscar($any($event.target).value, tabla)"
+      />
+    </p-iconfield>
+  </div>
+
+  <p-table
+    #tabla
+    [value]="clientes()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="limit"
+    [totalRecords]="total()"
+    [loading]="cargando()"
+    (onLazyLoad)="cargar($event)"
+    dataKey="id"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>RUT</th>
+        <th>Nombre</th>
+        <th>Telefono</th>
+        <th>Email</th>
+        <th>Estado</th>
+        <th style="width: 220px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-cliente>
+      <tr>
+        <td>{{ cliente.rutFormateado }}</td>
+        <td>{{ cliente.nombreCompleto }}</td>
+        <td>{{ cliente.telefono || '—' }}</td>
+        <td>{{ cliente.email || '—' }}</td>
+        <td>
+          <p-tag
+            [value]="cliente.activo ? 'Activo' : 'Inactivo'"
+            [severity]="cliente.activo ? 'success' : 'danger'"
+          />
+        </td>
+        <td class="acciones">
+          <button
+            pButton
+            icon="pi pi-car"
+            text
+            [routerLink]="['/vehiculos']"
+            [queryParams]="{ clienteId: cliente.id }"
+            title="Ver vehiculos"
+          ></button>
+          @if (auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+            <button pButton icon="pi pi-pencil" text (click)="abrirEditar(cliente)" title="Editar"></button>
+          }
+          @if (cliente.activo && auth.tieneRol('ADMIN')) {
+            <button
+              pButton
+              icon="pi pi-ban"
+              text
+              severity="danger"
+              (click)="confirmarDesactivar(cliente)"
+              title="Desactivar"
+            ></button>
+          }
+          @if (!cliente.activo && auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+            <button
+              pButton
+              icon="pi pi-refresh"
+              text
+              severity="success"
+              (click)="reactivar(cliente)"
+              title="Reactivar"
+            ></button>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="empty-state">No hay clientes que coincidan con la busqueda.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  [header]="editando() ? 'Editar cliente' : 'Nuevo cliente'"
+  [modal]="true"
+  [style]="{ width: '32rem' }"
+>
+  <form [formGroup]="form" class="form-grid" (ngSubmit)="guardar()">
+    <div class="form-field">
+      <label for="rut">RUT</label>
+      <input pInputText id="rut" formControlName="rut" placeholder="12345678-9" />
+      @if (form.controls.rut.invalid && form.controls.rut.touched) {
+        <small class="error">RUT obligatorio</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="nombre">Nombre</label>
+      <input pInputText id="nombre" formControlName="nombre" />
+      @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+        <small class="error">Nombre obligatorio</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="apellido">Apellido</label>
+      <input pInputText id="apellido" formControlName="apellido" />
+      @if (form.controls.apellido.invalid && form.controls.apellido.touched) {
+        <small class="error">Apellido obligatorio</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="telefono">Telefono</label>
+      <input pInputText id="telefono" formControlName="telefono" />
+    </div>
+    <div class="form-field">
+      <label for="email">Email</label>
+      <input pInputText id="email" type="email" formControlName="email" />
+    </div>
+    <div class="form-field" style="grid-column: 1 / -1">
+      <label for="direccion">Direccion</label>
+      <input pInputText id="direccion" formControlName="direccion" />
+    </div>
+  </form>
+
+  <div class="form-actions">
+    <button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="cerrarDialogo()"></button>
+    <button pButton type="button" label="Guardar" [loading]="guardando()" (click)="guardar()"></button>
+  </div>
+</p-dialog>

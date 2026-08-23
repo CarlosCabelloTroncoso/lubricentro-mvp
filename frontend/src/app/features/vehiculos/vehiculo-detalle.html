@@ -1,0 +1,91 @@
+<div class="page">
+  @if (cargando()) {
+    <div class="empty-state">
+      <p-progressSpinner styleClass="w-3rem h-3rem" />
+    </div>
+  } @else if (vehiculo(); as v) {
+    <div class="page-header">
+      <div>
+        <a routerLink="/vehiculos" class="volver"><i class="pi pi-arrow-left"></i> Vehiculos</a>
+        <h1>{{ v.patente }} — {{ v.descripcion }}</h1>
+      </div>
+      @if (auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+        <button pButton icon="pi pi-plus" label="Nueva orden de trabajo" (click)="crearOrden()"></button>
+      }
+    </div>
+
+    <div class="panels">
+      <p-card header="Ficha del vehiculo">
+        <dl class="ficha">
+          <dt>Cliente</dt>
+          <dd>
+            {{ v.cliente.nombreCompleto }}
+            <span class="muted">({{ v.cliente.rutFormateado }})</span>
+          </dd>
+          <dt>Marca / Modelo</dt>
+          <dd>{{ v.marca }} {{ v.modelo }}</dd>
+          <dt>Año</dt>
+          <dd>{{ v.anio ?? '—' }}</dd>
+          <dt>Color</dt>
+          <dd>{{ v.color ?? '—' }}</dd>
+          <dt>Kilometraje actual</dt>
+          <dd>{{ v.kilometrajeActual | number }} km</dd>
+          <dt>Estado</dt>
+          <dd>
+            <p-tag [value]="v.activo ? 'Activo' : 'Inactivo'" [severity]="v.activo ? 'success' : 'danger'" />
+          </dd>
+        </dl>
+      </p-card>
+    </div>
+
+    <h2 class="section-title">Historial de ordenes completadas</h2>
+
+    @if (historial().length === 0) {
+      <p class="empty-state">Este vehiculo todavia no tiene ordenes completadas.</p>
+    } @else {
+      <div class="historial">
+        @for (orden of historial(); track orden.id) {
+          <div class="orden-card">
+            <button class="orden-header" (click)="toggleExpandida(orden.id)">
+              <span class="numero">{{ orden.numero }}</span>
+              <p-tag [value]="orden.estado" [severity]="severidadEstado(orden.estado)" />
+              <span class="fecha">{{ orden.fechaCierre | date: 'dd-MM-yyyy' }}</span>
+              <span class="total money">{{ orden.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</span>
+              <i class="pi" [class.pi-chevron-down]="!expandidas().has(orden.id)" [class.pi-chevron-up]="expandidas().has(orden.id)"></i>
+            </button>
+
+            @if (expandidas().has(orden.id)) {
+              <div class="orden-lineas">
+                @if (orden.servicios.length > 0) {
+                  <h3>Servicios</h3>
+                  <ul>
+                    @for (linea of orden.servicios; track linea.id) {
+                      <li>
+                        <span>{{ linea.nombre }} × {{ linea.cantidad }}</span>
+                        <span class="money">{{ linea.subtotal | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+                @if (orden.productos.length > 0) {
+                  <h3>Productos</h3>
+                  <ul>
+                    @for (linea of orden.productos; track linea.id) {
+                      <li>
+                        <span>{{ linea.nombre }} × {{ linea.cantidad }}</span>
+                        <span class="money">{{ linea.subtotal | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</span>
+                      </li>
+                    }
+                  </ul>
+                }
+                @if (orden.observaciones) {
+                  <p class="observaciones"><strong>Observaciones:</strong> {{ orden.observaciones }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

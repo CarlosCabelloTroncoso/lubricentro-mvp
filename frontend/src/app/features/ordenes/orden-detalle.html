@@ -1,0 +1,156 @@
+<div class="page">
+  @if (cargando()) {
+    <div class="empty-state">
+      <p-progressSpinner styleClass="w-3rem h-3rem" />
+    </div>
+  } @else if (errorAcceso()) {
+    <div class="empty-state">
+      <i class="pi pi-lock" style="font-size: 2rem"></i>
+      <p>{{ errorAcceso() }}</p>
+      <a routerLink="/ordenes-trabajo">Volver al listado</a>
+    </div>
+  } @else if (orden(); as o) {
+    <div class="page-header">
+      <div>
+        <a routerLink="/ordenes-trabajo" class="volver"><i class="pi pi-arrow-left"></i> Ordenes de trabajo</a>
+        <h1>{{ o.numero }} <p-tag [value]="o.estado" [severity]="severidadEstado(o.estado)" /></h1>
+      </div>
+      <div class="acciones-estado">
+        @for (destino of transicionesDisponibles(); track destino) {
+          <button
+            pButton
+            [label]="etiquetaTransicion(destino)"
+            [severity]="destino === 'ANULADA' ? 'danger' : destino === 'COMPLETADA' ? 'success' : 'primary'"
+            [outlined]="destino === 'ANULADA'"
+            [disabled]="destino === 'COMPLETADA' && !puedeCompletar()"
+            [loading]="cambiandoEstado()"
+            (click)="cambiarEstado(destino)"
+          ></button>
+        }
+      </div>
+    </div>
+
+    <div class="panels">
+      <p-card header="Datos de la orden">
+        <dl class="ficha">
+          <dt>Cliente</dt>
+          <dd>{{ o.cliente.nombreCompleto }} <span class="muted">({{ o.cliente.rutFormateado }})</span></dd>
+          <dt>Vehiculo</dt>
+          <dd>
+            <a [routerLink]="['/vehiculos', o.vehiculo.id]">{{ o.vehiculo.patente }} · {{ o.vehiculo.descripcion }}</a>
+          </dd>
+          <dt>Mecanico</dt>
+          <dd>{{ o.mecanico?.nombre || 'Sin asignar' }}</dd>
+          <dt>Kilometraje</dt>
+          <dd>{{ o.kilometraje ? (o.kilometraje | number) + ' km' : '—' }}</dd>
+          <dt>Apertura</dt>
+          <dd>{{ o.fechaApertura | date: 'dd-MM-yyyy HH:mm' }}</dd>
+          @if (o.fechaCierre) {
+            <dt>Cierre</dt>
+            <dd>{{ o.fechaCierre | date: 'dd-MM-yyyy HH:mm' }}</dd>
+          }
+          @if (o.observaciones) {
+            <dt>Observaciones</dt>
+            <dd>{{ o.observaciones }}</dd>
+          }
+        </dl>
+      </p-card>
+
+      <p-card header="Total">
+        <div class="total-grande money">{{ o.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</div>
+        <p class="muted">Calculado por el backend a partir de las lineas.</p>
+        @if (!editable()) {
+          <button pButton icon="pi pi-history" label="Ver historial del vehiculo" text (click)="irAHistorial()"></button>
+        }
+      </p-card>
+    </div>
+
+    <div class="lineas-grid">
+      <p-card header="Servicios">
+        @if (o.servicios.length === 0) {
+          <p class="empty-state small">Sin servicios agregados.</p>
+        } @else {
+          <table class="tabla-lineas">
+            <tbody>
+              @for (linea of o.servicios; track linea.id) {
+                <tr>
+                  <td>{{ linea.nombre }}</td>
+                  <td class="cant">× {{ linea.cantidad }}</td>
+                  <td class="money">{{ linea.subtotal | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td>
+                  @if (editable()) {
+                    <td>
+                      <button pButton icon="pi pi-trash" text severity="danger" size="small" (click)="quitarServicio(linea.id)"></button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (editable()) {
+          <form class="linea-form" [formGroup]="formServicio" (ngSubmit)="agregarServicio()">
+            <p-select
+              formControlName="servicioId"
+              [options]="serviciosCatalogo()"
+              optionLabel="nombre"
+              optionValue="id"
+              placeholder="Selecciona un servicio"
+              filter
+              styleClass="flex-1"
+            >
+              <ng-template let-s pTemplate="item">
+                {{ s.nombre }} — {{ s.precio | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}
+              </ng-template>
+            </p-select>
+            <p-inputnumber formControlName="cantidad" [min]="1" [showButtons]="true" styleClass="cantidad" />
+            <button pButton type="submit" icon="pi pi-plus" [loading]="agregandoServicio()"></button>
+          </form>
+        }
+      </p-card>
+
+      <p-card header="Productos">
+        @if (o.productos.length === 0) {
+          <p class="empty-state small">Sin productos agregados.</p>
+        } @else {
+          <table class="tabla-lineas">
+            <tbody>
+              @for (linea of o.productos; track linea.id) {
+                <tr>
+                  <td>{{ linea.nombre }}</td>
+                  <td class="cant">× {{ linea.cantidad }}</td>
+                  <td class="money">{{ linea.subtotal | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td>
+                  @if (editable()) {
+                    <td>
+                      <button pButton icon="pi pi-trash" text severity="danger" size="small" (click)="quitarProducto(linea.id)"></button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (editable()) {
+          <form class="linea-form" [formGroup]="formProducto" (ngSubmit)="agregarProducto()">
+            <p-select
+              formControlName="productoId"
+              [options]="productosCatalogo()"
+              optionLabel="nombre"
+              optionValue="id"
+              placeholder="Selecciona un producto"
+              filter
+              styleClass="flex-1"
+            >
+              <ng-template let-p pTemplate="item">
+                {{ p.nombre }} — stock {{ p.stockActual }}
+              </ng-template>
+            </p-select>
+            <p-inputnumber formControlName="cantidad" [min]="1" [showButtons]="true" styleClass="cantidad" />
+            <button pButton type="submit" icon="pi pi-plus" [loading]="agregandoProducto()"></button>
+          </form>
+        }
+      </p-card>
+    </div>
+  }
+</div>

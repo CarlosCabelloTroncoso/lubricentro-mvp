@@ -1,0 +1,119 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Servicios</h1>
+    @if (auth.tieneRol('ADMIN')) {
+      <button pButton icon="pi pi-plus" label="Nuevo servicio" (click)="abrirCrear()"></button>
+    }
+  </div>
+
+  <div class="toolbar">
+    <p-iconfield>
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        placeholder="Buscar por nombre"
+        (input)="buscar($any($event.target).value, tabla)"
+      />
+    </p-iconfield>
+  </div>
+
+  <p-table
+    #tabla
+    [value]="servicios()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="limit"
+    [totalRecords]="total()"
+    [loading]="cargando()"
+    dataKey="id"
+    responsiveLayout="scroll"
+    (onLazyLoad)="cargar($event)"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Descripcion</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th style="width: 160px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-servicio>
+      <tr>
+        <td>{{ servicio.nombre }}</td>
+        <td>{{ servicio.descripcion || '—' }}</td>
+        <td class="money">{{ servicio.precio | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td>
+        <td>
+          <p-tag
+            [value]="servicio.activo ? 'Activo' : 'Inactivo'"
+            [severity]="servicio.activo ? 'success' : 'danger'"
+          />
+        </td>
+        <td class="acciones">
+          @if (auth.tieneRol('ADMIN')) {
+            <button pButton icon="pi pi-pencil" text (click)="abrirEditar(servicio)" title="Editar"></button>
+            @if (servicio.activo) {
+              <button
+                pButton
+                icon="pi pi-ban"
+                text
+                severity="danger"
+                (click)="confirmarDesactivar(servicio)"
+                title="Desactivar"
+              ></button>
+            } @else {
+              <button
+                pButton
+                icon="pi pi-refresh"
+                text
+                severity="success"
+                (click)="reactivar(servicio)"
+                title="Reactivar"
+              ></button>
+            }
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5" class="empty-state">No hay servicios que coincidan con la busqueda.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  [header]="editando() ? 'Editar servicio' : 'Nuevo servicio'"
+  [modal]="true"
+  [style]="{ width: '30rem' }"
+>
+  <form [formGroup]="form" class="form-grid" (ngSubmit)="guardar()">
+    <div class="form-field" style="grid-column: 1 / -1">
+      <label for="nombre">Nombre</label>
+      <input pInputText id="nombre" formControlName="nombre" />
+      @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+        <small class="error">Nombre obligatorio</small>
+      }
+    </div>
+    <div class="form-field" style="grid-column: 1 / -1">
+      <label for="descripcion">Descripcion</label>
+      <textarea pTextarea id="descripcion" formControlName="descripcion" rows="2"></textarea>
+    </div>
+    <div class="form-field">
+      <label for="precio">Precio (CLP)</label>
+      <p-inputnumber id="precio" formControlName="precio" mode="currency" currency="CLP" locale="es-CL" [minFractionDigits]="0" styleClass="w-full" />
+      @if (form.controls.precio.invalid && form.controls.precio.touched) {
+        <small class="error">Precio invalido</small>
+      }
+    </div>
+  </form>
+
+  <div class="form-actions">
+    <button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="cerrarDialogo()"></button>
+    <button pButton type="button" label="Guardar" [loading]="guardando()" (click)="guardar()"></button>
+  </div>
+</p-dialog>

@@ -1,0 +1,75 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Dashboard</h1>
+  </div>
+
+  @if (cargando()) {
+    <div class="empty-state">
+      <p-progressSpinner styleClass="w-3rem h-3rem" />
+    </div>
+  } @else if (datos(); as d) {
+    <div class="metric-grid">
+      @for (m of metricas(); track m.etiqueta) {
+        <a class="metric-card" [routerLink]="m.ruta ?? null" [class.clickable]="!!m.ruta">
+          <i [class]="m.icono"></i>
+          <div class="metric-value">
+            @if (m.esMoneda) {
+              {{ m.valor | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}
+            } @else {
+              {{ m.valor }}
+            }
+          </div>
+          <div class="metric-label">{{ m.etiqueta }}</div>
+        </a>
+      }
+    </div>
+
+    <div class="panels">
+      <p-card header="Reservas de hoy">
+        @if (d.reservasHoy.length === 0) {
+          <p class="empty-state">Sin reservas pendientes para hoy.</p>
+        } @else {
+          <ul class="lista">
+            @for (r of d.reservasHoy; track r.id) {
+              <li>
+                <span class="hora">{{ r.fechaHora | date: 'HH:mm' }}</span>
+                <span class="detalle">{{ r.vehiculo.patente }} · {{ r.vehiculo.descripcion }}</span>
+                <span class="cliente">{{ r.cliente.nombreCompleto }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </p-card>
+
+      <p-card header="Servicios mas solicitados">
+        @if (d.serviciosMasSolicitados.length === 0) {
+          <p class="empty-state">Aun no hay ordenes completadas.</p>
+        } @else {
+          <ul class="lista">
+            @for (s of d.serviciosMasSolicitados; track s.nombre) {
+              <li>
+                <span class="detalle">{{ s.nombre }}</span>
+                <span class="cliente">{{ s.veces }} veces</span>
+              </li>
+            }
+          </ul>
+        }
+      </p-card>
+
+      <p-card header="Alertas de stock">
+        @if (d.alertasStock.length === 0) {
+          <p class="empty-state">Sin productos bajo el minimo.</p>
+        } @else {
+          <ul class="lista">
+            @for (p of d.alertasStock; track p.id) {
+              <li>
+                <span class="detalle">{{ p.nombre }}</span>
+                <p-tag severity="danger" [value]="p.stockActual + ' / ' + p.stockMinimo" />
+              </li>
+            }
+          </ul>
+        }
+      </p-card>
+    </div>
+  }
+</div>

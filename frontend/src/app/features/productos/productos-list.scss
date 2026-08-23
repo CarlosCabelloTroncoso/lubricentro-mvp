@@ -1,0 +1,16 @@
+.acciones {
+  display: flex;
+  gap: 0.15rem;
+  justify-content: flex-end;
+}
+
+.stock-bajo {
+  color: var(--p-red-600);
+  font-weight: 600;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+  margin: 0.5rem 0 0;
+}
