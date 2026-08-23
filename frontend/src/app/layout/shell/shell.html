@@ -1,0 +1,72 @@
+<ng-template #navContent>
+  <div class="brand">
+    <i class="pi pi-cog"></i>
+    <span>Lubricentro</span>
+  </div>
+
+  <nav class="nav">
+    @for (item of items; track item.ruta) {
+      <a
+        [routerLink]="item.ruta"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.ruta === '/' }"
+        (click)="cerrarMenu()"
+      >
+        <i [class]="item.icono"></i>
+        <span>{{ item.etiqueta }}</span>
+      </a>
+    }
+  </nav>
+</ng-template>
+
+<div class="shell">
+  <aside class="sidebar">
+    <ng-container [ngTemplateOutlet]="navContent" />
+  </aside>
+
+  <p-drawer
+    [visible]="menuMovilVisible()"
+    (visibleChange)="menuMovilVisible.set($event)"
+    position="left"
+    styleClass="drawer-menu"
+    [modal]="true"
+  >
+    <ng-container [ngTemplateOutlet]="navContent" />
+  </p-drawer>
+
+  <div class="main">
+    <header class="topbar">
+      <button
+        pButton
+        icon="pi pi-bars"
+        text
+        severity="secondary"
+        class="hamburger"
+        (click)="abrirMenu()"
+        title="Abrir menu"
+      ></button>
+
+      <div class="spacer"></div>
+
+      @if (usuario(); as u) {
+        <div class="user">
+          <p-tag [value]="u.rol" severity="info" class="rol-tag" />
+          <span class="nombre">{{ u.nombre }}</span>
+          <p-avatar [label]="iniciales(u.nombre)" shape="circle" />
+          <button
+            pButton
+            icon="pi pi-sign-out"
+            text
+            severity="secondary"
+            (click)="cerrarSesion()"
+            title="Cerrar sesion"
+          ></button>
+        </div>
+      }
+    </header>
+
+    <main class="content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

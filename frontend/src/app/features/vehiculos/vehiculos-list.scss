@@ -1,0 +1,12 @@
+.acciones {
+  display: flex;
+  gap: 0.15rem;
+  justify-content: flex-end;
+}
+
+.cliente-filtro-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  max-width: 100%;
+}

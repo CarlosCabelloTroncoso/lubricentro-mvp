@@ -1,0 +1,177 @@
+.volver {
+  font-size: 0.8rem;
+  color: var(--p-text-muted-color);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.35rem;
+
+  &:hover {
+    color: var(--p-primary-color);
+  }
+}
+
+.page-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.acciones-estado {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ficha {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+  min-width: 0;
+
+  dt {
+    color: var(--p-text-muted-color);
+    font-size: 0.85rem;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 500;
+    min-width: 0;
+    overflow-wrap: break-word;
+
+    a {
+      color: var(--p-primary-color);
+    }
+  }
+
+  .muted {
+    color: var(--p-text-muted-color);
+    font-weight: 400;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 0.15rem 0;
+
+    dt {
+      margin-top: 0.5rem;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+}
+
+.total-grande {
+  font-size: 2rem;
+  font-weight: 800;
+  overflow-wrap: break-word;
+}
+
+.muted {
+  color: var(--p-text-muted-color);
+  font-size: 0.8rem;
+}
+
+.lineas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  min-width: 0;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.empty-state.small {
+  padding: 1rem;
+}
+
+.tabla-lineas {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  td {
+    padding: 0.4rem 0.25rem;
+    border-bottom: 1px solid var(--p-surface-100);
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+  }
+
+  td:first-child {
+    /* La columna de nombre es la unica que debe repartirse el espacio
+       restante; las demas se ajustan a su contenido. */
+    width: 100%;
+  }
+
+  .cant {
+    color: var(--p-text-muted-color);
+    white-space: nowrap;
+  }
+
+  .money {
+    white-space: nowrap;
+  }
+}
+
+.linea-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+
+  .flex-1 {
+    flex: 1 1 12rem;
+    min-width: 0;
+  }
+
+  ::ng-deep .cantidad {
+    width: 8rem;
+    flex: 0 0 auto;
+  }
+
+  @media (max-width: 480px) {
+    .flex-1 {
+      flex-basis: 100%;
+    }
+
+    ::ng-deep .cantidad {
+      flex: 1 1 auto;
+      width: auto;
+    }
+
+    > button {
+      flex: 0 0 auto;
+    }
+  }
+}

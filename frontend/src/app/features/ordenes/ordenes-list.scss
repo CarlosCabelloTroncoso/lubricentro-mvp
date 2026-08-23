@@ -1,0 +1,26 @@
+.vehiculo-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: var(--p-surface-100);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Chips de filtro por estado: nunca deben apilarse a ancho completo, solo
+   envolver en varias lineas cuando no entran. Pisa la regla generica de
+   .toolbar > * { width: 100% } de styles.scss (mayor especificidad por el
+   scope del componente). */
+.toolbar > button {
+  width: auto;
+}
+
+::ng-deep .p-autocomplete {
+  width: 100%;
+
+  .p-autocomplete-input {
+    width: 100%;
+  }
+}

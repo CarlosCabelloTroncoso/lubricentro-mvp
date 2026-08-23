@@ -1,0 +1,173 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Vehiculos</h1>
+    @if (auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+      <button pButton icon="pi pi-plus" label="Nuevo vehiculo" (click)="abrirCrear()"></button>
+    }
+  </div>
+
+  <div class="toolbar">
+    <p-iconfield>
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        pInputText
+        type="text"
+        placeholder="Buscar por patente, marca o modelo"
+        (input)="buscar($any($event.target).value, tabla)"
+      />
+    </p-iconfield>
+    @if (clienteNombreFiltro()) {
+      <div class="cliente-filtro-chip">
+        <p-tag [value]="'Cliente: ' + clienteNombreFiltro()" />
+        <button pButton icon="pi pi-times" text severity="secondary" (click)="quitarFiltroCliente(tabla)"></button>
+      </div>
+    }
+  </div>
+
+  <div class="table-scroll">
+  <p-table
+    #tabla
+    [value]="vehiculos()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="limit"
+    [totalRecords]="total()"
+    [loading]="cargando()"
+    (onLazyLoad)="cargar($event)"
+    dataKey="id"
+    responsiveLayout="scroll"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Patente</th>
+        <th>Vehiculo</th>
+        <th class="hide-mobile">Cliente</th>
+        <th class="hide-mobile">Kilometraje</th>
+        <th>Estado</th>
+        <th style="width: 220px"></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-vehiculo>
+      <tr>
+        <td><strong>{{ vehiculo.patente }}</strong></td>
+        <td>{{ vehiculo.descripcion }} @if (vehiculo.anio) { ({{ vehiculo.anio }}) }</td>
+        <td class="hide-mobile">{{ vehiculo.cliente.nombreCompleto }}</td>
+        <td class="hide-mobile">{{ vehiculo.kilometrajeActual | number }} km</td>
+        <td>
+          <p-tag
+            [value]="vehiculo.activo ? 'Activo' : 'Inactivo'"
+            [severity]="vehiculo.activo ? 'success' : 'danger'"
+          />
+        </td>
+        <td class="acciones">
+          <button
+            pButton
+            icon="pi pi-eye"
+            text
+            [routerLink]="['/vehiculos', vehiculo.id]"
+            title="Ver ficha e historial"
+          ></button>
+          @if (auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+            <button pButton icon="pi pi-pencil" text (click)="abrirEditar(vehiculo)" title="Editar"></button>
+          }
+          @if (vehiculo.activo && auth.tieneRol('ADMIN')) {
+            <button
+              pButton
+              icon="pi pi-ban"
+              text
+              severity="danger"
+              (click)="confirmarDesactivar(vehiculo)"
+              title="Desactivar"
+            ></button>
+          }
+          @if (!vehiculo.activo && auth.tieneRol('ADMIN', 'RECEPCIONISTA')) {
+            <button
+              pButton
+              icon="pi pi-refresh"
+              text
+              severity="success"
+              (click)="reactivar(vehiculo)"
+              title="Reactivar"
+            ></button>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="empty-state">No hay vehiculos que coincidan con la busqueda.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+  </div>
+</div>
+
+<p-dialog
+  [visible]="dialogoVisible()"
+  (visibleChange)="dialogoVisible.set($event)"
+  [header]="editando() ? 'Editar vehiculo' : 'Nuevo vehiculo'"
+  [modal]="true"
+  [style]="{ width: '34rem' }"
+>
+  <form [formGroup]="form" class="form-grid" (ngSubmit)="guardar()">
+    <div class="form-field" style="grid-column: 1 / -1">
+      <label for="clienteId">Cliente</label>
+      <p-select
+        id="clienteId"
+        formControlName="clienteId"
+        [options]="clientesOpciones()"
+        optionLabel="nombreCompleto"
+        optionValue="id"
+        placeholder="Selecciona un cliente"
+        filter
+        filterBy="nombreCompleto,rutFormateado"
+        styleClass="w-full"
+      >
+        <ng-template let-cliente pTemplate="item">
+          {{ cliente.nombreCompleto }} — {{ cliente.rutFormateado }}
+        </ng-template>
+      </p-select>
+      @if (form.controls.clienteId.invalid && form.controls.clienteId.touched) {
+        <small class="error">Selecciona un cliente</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="patente">Patente</label>
+      <input pInputText id="patente" formControlName="patente" placeholder="ABCD12" />
+      @if (form.controls.patente.invalid && form.controls.patente.touched) {
+        <small class="error">Patente obligatoria</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="anio">Año</label>
+      <p-inputnumber id="anio" formControlName="anio" [useGrouping]="false" styleClass="w-full" />
+    </div>
+    <div class="form-field">
+      <label for="marca">Marca</label>
+      <input pInputText id="marca" formControlName="marca" />
+      @if (form.controls.marca.invalid && form.controls.marca.touched) {
+        <small class="error">Marca obligatoria</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="modelo">Modelo</label>
+      <input pInputText id="modelo" formControlName="modelo" />
+      @if (form.controls.modelo.invalid && form.controls.modelo.touched) {
+        <small class="error">Modelo obligatorio</small>
+      }
+    </div>
+    <div class="form-field">
+      <label for="color">Color</label>
+      <input pInputText id="color" formControlName="color" />
+    </div>
+    <div class="form-field">
+      <label for="km">Kilometraje actual</label>
+      <p-inputnumber id="km" formControlName="kilometrajeActual" [useGrouping]="true" suffix=" km" styleClass="w-full" />
+    </div>
+  </form>
+
+  <div class="form-actions">
+    <button pButton type="button" label="Cancelar" severity="secondary" [text]="true" (click)="cerrarDialogo()"></button>
+    <button pButton type="button" label="Guardar" [loading]="guardando()" (click)="guardar()"></button>
+  </div>
+</p-dialog>
