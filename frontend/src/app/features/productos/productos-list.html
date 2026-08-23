@@ -18,6 +18,7 @@
     </p-iconfield>
   </div>
 
+  <div class="table-scroll">
   <p-table
     #tabla
     [value]="productos()"
@@ -35,7 +36,7 @@
         <th>Nombre</th>
         <th>Precio</th>
         <th>Stock</th>
-        <th>Estado</th>
+        <th class="hide-mobile">Estado</th>
         <th style="width: 220px"></th>
       </tr>
     </ng-template>
@@ -51,7 +52,7 @@
             <p-tag severity="danger" value="Bajo minimo" styleClass="ml-2" />
           }
         </td>
-        <td>
+        <td class="hide-mobile">
           <p-tag
             [value]="producto.activo ? 'Activo' : 'Inactivo'"
             [severity]="producto.activo ? 'success' : 'danger'"
@@ -92,6 +93,7 @@
       </tr>
     </ng-template>
   </p-table>
+  </div>
 </div>
 
 <p-dialog

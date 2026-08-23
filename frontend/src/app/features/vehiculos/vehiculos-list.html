@@ -17,11 +17,14 @@
       />
     </p-iconfield>
     @if (clienteNombreFiltro()) {
-      <p-tag [value]="'Cliente: ' + clienteNombreFiltro()" />
-      <button pButton icon="pi pi-times" text severity="secondary" (click)="quitarFiltroCliente(tabla)"></button>
+      <div class="cliente-filtro-chip">
+        <p-tag [value]="'Cliente: ' + clienteNombreFiltro()" />
+        <button pButton icon="pi pi-times" text severity="secondary" (click)="quitarFiltroCliente(tabla)"></button>
+      </div>
     }
   </div>
 
+  <div class="table-scroll">
   <p-table
     #tabla
     [value]="vehiculos()"
@@ -38,8 +41,8 @@
       <tr>
         <th>Patente</th>
         <th>Vehiculo</th>
-        <th>Cliente</th>
-        <th>Kilometraje</th>
+        <th class="hide-mobile">Cliente</th>
+        <th class="hide-mobile">Kilometraje</th>
         <th>Estado</th>
         <th style="width: 220px"></th>
       </tr>
@@ -48,8 +51,8 @@
       <tr>
         <td><strong>{{ vehiculo.patente }}</strong></td>
         <td>{{ vehiculo.descripcion }} @if (vehiculo.anio) { ({{ vehiculo.anio }}) }</td>
-        <td>{{ vehiculo.cliente.nombreCompleto }}</td>
-        <td>{{ vehiculo.kilometrajeActual | number }} km</td>
+        <td class="hide-mobile">{{ vehiculo.cliente.nombreCompleto }}</td>
+        <td class="hide-mobile">{{ vehiculo.kilometrajeActual | number }} km</td>
         <td>
           <p-tag
             [value]="vehiculo.activo ? 'Activo' : 'Inactivo'"
@@ -96,6 +99,7 @@
       </tr>
     </ng-template>
   </p-table>
+  </div>
 </div>
 
 <p-dialog
