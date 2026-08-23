@@ -1,8 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { Avatar } from 'primeng/avatar';
 import { Tag } from 'primeng/tag';
 import { ButtonDirective } from 'primeng/button';
+import { Drawer } from 'primeng/drawer';
 import { AuthService } from '../../core/services/auth.service';
 
 interface ItemMenu {
@@ -22,7 +24,16 @@ const ITEMS: ItemMenu[] = [
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Avatar, Tag, ButtonDirective],
+  imports: [
+    NgTemplateOutlet,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    Avatar,
+    Tag,
+    ButtonDirective,
+    Drawer,
+  ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
 })
@@ -33,12 +44,23 @@ export class Shell {
   readonly items = ITEMS;
   readonly usuario = this.auth.usuario;
 
+  /** Drawer del menu en tablet/movil. En desktop el sidebar es fijo (ver shell.scss). */
+  readonly menuMovilVisible = signal(false);
+
   iniciales(nombre: string): string {
     return nombre
       .split(' ')
       .slice(0, 2)
       .map((parte) => parte.charAt(0).toUpperCase())
       .join('');
+  }
+
+  abrirMenu(): void {
+    this.menuMovilVisible.set(true);
+  }
+
+  cerrarMenu(): void {
+    this.menuMovilVisible.set(false);
   }
 
   async cerrarSesion(): Promise<void> {

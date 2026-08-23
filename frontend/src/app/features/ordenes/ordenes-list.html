@@ -26,6 +26,7 @@
     }
   </div>
 
+  <div class="table-scroll">
   <p-table
     #tabla
     [value]="ordenes()"
@@ -42,11 +43,11 @@
       <tr>
         <th>Numero</th>
         <th>Vehiculo</th>
-        <th>Cliente</th>
-        <th>Mecanico</th>
+        <th class="hide-mobile">Cliente</th>
+        <th class="hide-tablet">Mecanico</th>
         <th>Estado</th>
         <th>Total</th>
-        <th>Apertura</th>
+        <th class="hide-tablet">Apertura</th>
         <th style="width: 60px"></th>
       </tr>
     </ng-template>
@@ -54,11 +55,11 @@
       <tr>
         <td><strong>{{ orden.numero }}</strong></td>
         <td>{{ orden.vehiculo.patente }} · {{ orden.vehiculo.descripcion }}</td>
-        <td>{{ orden.cliente.nombreCompleto }}</td>
-        <td>{{ orden.mecanico?.nombre || '—' }}</td>
+        <td class="hide-mobile">{{ orden.cliente.nombreCompleto }}</td>
+        <td class="hide-tablet">{{ orden.mecanico?.nombre || '—' }}</td>
         <td><p-tag [value]="orden.estado" [severity]="severidadEstado(orden.estado)" /></td>
         <td class="money">{{ orden.total | currency: 'CLP' : 'symbol-narrow' : '1.0-0' }}</td>
-        <td>{{ orden.fechaApertura | date: 'dd-MM-yyyy HH:mm' }}</td>
+        <td class="hide-tablet">{{ orden.fechaApertura | date: 'dd-MM-yyyy HH:mm' }}</td>
         <td>
           <button pButton icon="pi pi-eye" text [routerLink]="['/ordenes-trabajo', orden.id]" title="Ver detalle"></button>
         </td>
@@ -70,6 +71,7 @@
       </tr>
     </ng-template>
   </p-table>
+  </div>
 </div>
 
 <p-dialog

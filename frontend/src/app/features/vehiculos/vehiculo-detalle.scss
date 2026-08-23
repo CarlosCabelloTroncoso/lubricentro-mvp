@@ -14,9 +14,10 @@
 
 .panels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+  min-width: 0;
 }
 
 .ficha {
@@ -24,6 +25,7 @@
   grid-template-columns: auto 1fr;
   gap: 0.5rem 1rem;
   margin: 0;
+  min-width: 0;
 
   dt {
     color: var(--p-text-muted-color);
@@ -33,12 +35,27 @@
   dd {
     margin: 0;
     font-weight: 500;
+    min-width: 0;
+    overflow-wrap: break-word;
   }
 
   .muted {
     color: var(--p-text-muted-color);
     font-weight: 400;
     font-size: 0.85rem;
+  }
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+    gap: 0.15rem 0;
+
+    dt {
+      margin-top: 0.5rem;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
   }
 }
 
@@ -51,6 +68,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  min-width: 0;
 }
 
 .orden-card {
@@ -64,13 +82,15 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   padding: 0.75rem 1rem;
   background: none;
   border: none;
   cursor: pointer;
   font: inherit;
   text-align: left;
+  min-width: 0;
 
   .numero {
     font-weight: 700;
@@ -84,10 +104,17 @@
   .total {
     margin-left: auto;
     font-weight: 700;
+    white-space: nowrap;
   }
 
   &:hover {
     background: var(--p-surface-50);
+  }
+
+  @media (max-width: 400px) {
+    .fecha {
+      display: none;
+    }
   }
 }
 
@@ -110,13 +137,25 @@
   li {
     display: flex;
     justify-content: space-between;
+    gap: 0.75rem;
     padding: 0.25rem 0;
     font-size: 0.9rem;
+
+    span:first-child {
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    span:last-child {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
   }
 
   .observaciones {
     margin-top: 0.75rem;
     font-size: 0.85rem;
     color: var(--p-text-muted-color);
+    overflow-wrap: break-word;
   }
 }

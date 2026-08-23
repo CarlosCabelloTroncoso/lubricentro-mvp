@@ -1,5 +1,13 @@
 @import 'primeicons/primeicons.css';
 
+/*
+  Breakpoints usados en todo el frontend (coordinar con cualquier media query
+  nueva que se agregue en un componente):
+    movil   <= 640px
+    tablet  641px - 1024px
+    desktop > 1024px
+*/
+
 * {
   box-sizing: border-box;
 }
@@ -8,6 +16,11 @@ html,
 body {
   height: 100%;
   margin: 0;
+  width: 100%;
+  /* Red de seguridad: ningun contenido de una pantalla individual debe poder
+     forzar scroll horizontal de la app entera. Cada contenedor con contenido
+     ancho (tablas, formularios) resuelve su propio overflow-x: auto. */
+  overflow-x: hidden;
   font-family:
     -apple-system,
     BlinkMacSystemFont,
@@ -27,6 +40,11 @@ body {
   padding: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    padding: 1rem;
+  }
 }
 
 .page-header {
@@ -41,6 +59,17 @@ body {
     font-size: 1.4rem;
     margin: 0;
   }
+
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 1.2rem;
+    }
+
+    > button,
+    > a {
+      width: 100%;
+    }
+  }
 }
 
 .toolbar {
@@ -49,18 +78,48 @@ body {
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 1rem;
+
+  @media (max-width: 640px) {
+    > * {
+      width: 100%;
+    }
+  }
+}
+
+/* p-iconfield es display:block por defecto, pero el <input> interno no
+   hereda ese ancho: sin esto un buscador dentro de un .toolbar al 100%
+   se ve angosto en movil. En desktop se limita a un ancho comodo. */
+.p-iconfield {
+  width: 100%;
+
+  input {
+    width: 100%;
+  }
+}
+
+@media (min-width: 641px) {
+  .toolbar .p-iconfield {
+    width: auto;
+    min-width: 280px;
+  }
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
+  min-width: 0;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-field {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  min-width: 0;
 
   label {
     font-size: 0.85rem;
@@ -72,6 +131,19 @@ body {
     color: var(--p-red-500);
     font-size: 0.75rem;
   }
+
+  /* Los inputs nativos de PrimeNG no son 100% de ancho por defecto (esa es
+     la variante "fluid"); esto evita repetir styleClass="w-full" en cada
+     campo de cada formulario del proyecto. */
+  input[pInputText],
+  textarea,
+  .p-select,
+  .p-inputnumber,
+  .p-autocomplete,
+  .p-password,
+  .p-password input {
+    width: 100%;
+  }
 }
 
 .form-actions {
@@ -79,6 +151,14 @@ body {
   justify-content: flex-end;
   gap: 0.5rem;
   margin-top: 1rem;
+
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
 }
 
 .empty-state {
@@ -89,4 +169,65 @@ body {
 
 .money {
   font-variant-numeric: tabular-nums;
+}
+
+/* Contenedor de scroll horizontal PROPIO para tablas anchas: la tabla nunca
+   debe forzar el ancho de .page/.content. PrimeNG no agrega overflow-x al
+   contenedor de la tabla salvo que se use [scrollable], que trae virtual
+   scroll y columnas congeladas — mas de lo que este MVP necesita. */
+.table-scroll {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Utilidades para ocultar columnas secundarias de una tabla en breakpoints
+   chicos, manteniendo siempre visibles los datos esenciales y las acciones. */
+@media (max-width: 1024px) {
+  .hide-tablet {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+/* Paneles overlay (select, autocomplete, datepicker): nunca mas anchos que
+   el viewport, aunque su contenido (nombres largos de productos/servicios)
+   sugiera un ancho mayor. */
+.p-select-overlay,
+.p-autocomplete-overlay,
+.p-datepicker-panel {
+  max-width: 94vw;
+}
+
+/* Dialogs: cada uno fija su ancho comodo en desktop vía [style]; esta regla
+   solo evita que ese ancho exceda el viewport en pantallas chicas (max-width
+   no pisa el width explicito salvo que lo supere, así que alcanza con esto
+   sin tocar cada dialog individualmente). */
+.p-dialog {
+  max-width: 94vw;
+}
+
+/* Toast: por defecto se posiciona a 20px del borde sin ancho fijo; en
+   pantallas muy chicas ese margen deja poco lugar para el texto. */
+@media (max-width: 480px) {
+  .p-toast {
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    width: auto !important;
+  }
+}
+
+/* Objetivo tactil minimo (44px) para botones de icono en tablas y toolbars,
+   sin agrandar los botones normales con texto. */
+@media (max-width: 1024px) {
+  .p-button.p-button-icon-only {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
 }

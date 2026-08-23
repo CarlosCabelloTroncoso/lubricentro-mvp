@@ -1,8 +1,9 @@
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
+  min-width: 0;
 }
 
 .metric-card {
@@ -15,6 +16,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  min-width: 0;
 
   i {
     font-size: 1.3rem;
@@ -31,8 +33,9 @@
 }
 
 .metric-value {
-  font-size: 1.6rem;
+  font-size: clamp(1.25rem, 4vw, 1.6rem);
   font-weight: 700;
+  overflow-wrap: break-word;
 }
 
 .metric-label {
@@ -42,8 +45,9 @@
 
 .panels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 1rem;
+  min-width: 0;
 }
 
 .lista {
@@ -62,6 +66,7 @@
     font-size: 0.9rem;
     border-bottom: 1px solid var(--p-surface-100);
     padding-bottom: 0.5rem;
+    flex-wrap: wrap;
 
     &:last-child {
       border-bottom: none;
@@ -76,7 +81,9 @@
   }
 
   .detalle {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: break-word;
   }
 
   .cliente {
